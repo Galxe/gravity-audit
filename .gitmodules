@@ -1,0 +1,9 @@
+[submodule "gravity-reth"]
+	path = gravity-reth
+	url = https://github.com/Galxe/gravity-reth.git
+	branch = main
+
+[submodule "gravity-sdk"]
+	path = gravity-sdk
+	url = https://github.com/Galxe/gravity-sdk.git
+	branch = main

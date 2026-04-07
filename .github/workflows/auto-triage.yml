@@ -1,0 +1,37 @@
+name: Auto Triage Audit Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Auto-label by severity and repo
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.issue.title;
+            const labels = [];
+
+            // Severity from title: [GRETH-020] [CRITICAL] ...
+            const severityMatch = title.match(/\[(CRITICAL|HIGH|MEDIUM|LOW|INFO)\]/i);
+            if (severityMatch) {
+              labels.push(`severity: ${severityMatch[1].toLowerCase()}`);
+            }
+
+            // Repo from finding ID: [GRETH-xxx] or [GSDK-xxx]
+            if (/\[GRETH-/i.test(title)) labels.push('repo: gravity-reth');
+            else if (/\[GSDK-/i.test(title)) labels.push('repo: gravity-sdk');
+
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                labels: labels,
+              });
+            }
