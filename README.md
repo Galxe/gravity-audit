@@ -1,34 +1,34 @@
 # GravityAIAudit
 
-Gravity L1 安全审计问题统一追踪仓库。
+Centralized security audit issue tracking for Gravity L1.
 
-所有审计轮次（内部 AI 审计、外部专业审计）的发现均在此集中管理，覆盖 `gravity-reth`、`gravity-sdk` 及相关合约。
-
----
-
-## 目录
-
-- [一、仓库结构](#一仓库结构)
-- [二、Issue 层级规范](#二issue-层级规范)
-- [三、Label 体系](#三label-体系)
-- [四、认领与处理流程](#四认领与处理流程)
-- [五、AI 自动化辅助](#五ai-自动化辅助)
-- [六、代码子模块](#六代码子模块)
+All audit findings across every round (internal AI audits, external professional audits) are managed here, covering `gravity-reth`, `gravity-sdk`, and related contracts.
 
 ---
 
-## 一、仓库结构
+## Table of Contents
+
+- [Repository Structure](#repository-structure)
+- [Issue Hierarchy](#issue-hierarchy)
+- [Label System](#label-system)
+- [Triage & Fix Workflow](#triage--fix-workflow)
+- [AI Automation](#ai-automation)
+- [Code Submodules](#code-submodules)
+
+---
+
+## Repository Structure
 
 ```
 GravityAIAudit/
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
-│   │   ├── audit-round.md        # Parent Issue 模板（审计轮次）
-│   │   └── finding.md            # Sub-issue 模板（单条发现）
+│   │   ├── audit-round.md        # Parent Issue template (audit round)
+│   │   └── finding.md            # Sub-issue template (single finding)
 │   └── workflows/
-│       └── auto-triage.yml       # AI 自动分拣 Workflow（进阶）
+│       └── auto-triage.yml       # Auto-label workflow
 ├── audits/
-│   ├── 2026-02-23-gravity-reth/  # 每轮审计的原始报告存档
+│   ├── 2026-02-23-gravity-reth/  # Raw report archives per round
 │   ├── 2026-02-28-gravity-sdk/
 │   └── 2026-03-05-phase2/
 ├── gravity-reth/                  # git submodule
@@ -38,133 +38,133 @@ GravityAIAudit/
 
 ---
 
-## 二、Issue 层级规范
+## Issue Hierarchy
 
-### Parent Issue（审计轮次）
+### Parent Issue (Audit Round)
 
-一轮审计对应一个 Parent Issue，用于承载宏观信息。
+One Parent Issue per audit round, capturing high-level metadata.
 
-**命名格式：**
+**Naming format:**
 ```
-[AUDIT] <来源> <轮次> — <目标仓库> <版本/日期>
+[AUDIT] <Source> <Round> — <Target Repo> <Version/Date>
 ```
 
-**示例：**
+**Examples:**
 - `[AUDIT] AI Phase 1 — gravity-reth 2026-02-23`
 - `[AUDIT] AI Phase 2 — gravity-reth + gravity-sdk 2026-03-05`
 - `[AUDIT] Trail of Bits Round 1 — gravity-reth v1.0.0`
 
-**必填字段（Issue body）：**
+**Required fields (Issue body):**
 ```
-- **审计来源**: AI (Claude Opus 4.6) / Trail of Bits / OtterSec / ...
-- **审计范围**: gravity-reth crates/... , gravity-sdk crates/...
-- **代码版本**: commit hash 或 tag
-- **报告链接**: 指向 audits/ 目录下的原始报告
-- **统计**: CRITICAL x, HIGH x, MEDIUM x, LOW x, INFO x
-```
-
-### Sub-issue（单条发现）
-
-每条审计发现对应一个 Sub-issue，挂载在对应的 Parent Issue 下。
-
-**命名格式：**
-```
-[<REPO>-<ID>] [<SEVERITY>] <简短标题>
+- **Audit Source**: AI (Claude Opus 4.6) / Trail of Bits / OtterSec / ...
+- **Scope**: gravity-reth crates/..., gravity-sdk crates/...
+- **Code Version**: commit hash or tag
+- **Report Link**: link to raw report under audits/
+- **Stats**: CRITICAL x, HIGH x, MEDIUM x, LOW x, INFO x
 ```
 
-**示例：**
+### Sub-issue (Single Finding)
+
+One Sub-issue per finding, linked to the corresponding Parent Issue.
+
+**Naming format:**
+```
+[<REPO>-<ID>] [<SEVERITY>] <short title>
+```
+
+**Examples:**
 - `[GRETH-020] [CRITICAL] Pipeline permanent deadlock via barrier timeout gap`
 - `[GSDK-017] [HIGH] Nested mutex holding in BlockBufferManager`
 
-**必填字段见 Issue 模板。**
+See the Issue template for required fields.
 
 ---
 
-## 三、Label 体系
+## Label System
 
-### 严重等级（自动从 Issue title 推断）
+### Severity
 
-| Label | 颜色 | 含义 |
-|-------|------|------|
-| `severity: critical` | `#B60205` 深红 | 可导致链上状态分叉、资金损失、永久 DoS |
-| `severity: high` | `#E11D48` 红 | 可被触发的严重安全问题 |
-| `severity: medium` | `#F97316` 橙 | 防御深度问题，需计划修复 |
-| `severity: low` | `#EAB308` 黄 | 低风险，建议改进 |
-| `severity: info` | `#6B7280` 灰 | 信息性，无安全影响 |
+| Label | Color | Meaning |
+|-------|-------|---------|
+| `severity: critical` | 🔴 `#B60205` | Can cause chain state fork, fund loss, or permanent DoS |
+| `severity: high` | 🟠 `#E11D48` | Exploitable security issue |
+| `severity: medium` | 🟡 `#F97316` | Defense-in-depth concern, plan to fix |
+| `severity: low` | 🟢 `#EAB308` | Low risk, suggested improvement |
+| `severity: info` | ⚪ `#6B7280` | Informational, no security impact |
 
-### 目标仓库
+### Target Repository
 
-| Label | 含义 |
-|-------|------|
-| `repo: gravity-reth` | 问题位于 gravity-reth |
-| `repo: gravity-sdk` | 问题位于 gravity-sdk |
-| `repo: contracts` | 问题位于链上合约 |
-| `repo: cross` | 跨仓库问题 |
+| Label | Meaning |
+|-------|---------|
+| `repo: gravity-reth` | Issue in gravity-reth |
+| `repo: gravity-sdk` | Issue in gravity-sdk |
+| `repo: contracts` | Issue in on-chain contracts |
+| `repo: cross` | Cross-repository issue |
 
-### 处理状态
+### Status
 
-| Label | 含义 |
-|-------|------|
-| `status: needs-triage` | 待确认（新建时默认） |
-| `status: confirmed` | 已确认为真实问题 |
-| `status: invalid` | 误报，经讨论确认无效 |
-| `status: wont-fix` | 已知问题，决定不修复（需说明理由） |
-| `status: in-progress` | 修复中 |
-| `status: fixed` | 已修复，待验证 |
-| `status: verified` | 修复已验证通过 |
+| Label | Meaning |
+|-------|---------|
+| `status: needs-triage` | Newly opened, awaiting confirmation (default) |
+| `status: confirmed` | Confirmed as a real issue |
+| `status: invalid` | False positive, confirmed non-issue |
+| `status: wont-fix` | Known issue, decided not to fix (reason required in comment) |
+| `status: in-progress` | Fix in progress |
+| `status: fixed` | Fix committed, awaiting verification |
+| `status: verified` | Fix verified and closed |
 
-### 审计来源
+### Source
 
-| Label | 含义 |
-|-------|------|
-| `source: ai-audit` | AI 自动化审计发现 |
-| `source: manual-audit` | 人工专业审计发现 |
-| `source: community` | 社区/漏洞赏金发现 |
+| Label | Meaning |
+|-------|---------|
+| `source: ai-audit` | Found by AI automated audit |
+| `source: manual-audit` | Found by professional manual audit |
+| `source: community` | Found by community / bug bounty |
 
-### 开发者归属（按 git blame 自动分配）
+### Ownership
 
-按实际团队成员 GitHub handle 创建，例如：
+Create per-developer labels using GitHub handles, e.g.:
 - `owner: @alice`
 - `owner: @bob`
 
 ---
 
-## 四、认领与处理流程
+## Triage & Fix Workflow
 
-### 4.1 新建流程（审计完成后）
+### Creating Issues (After an Audit)
 
 ```
-1. 创建 Parent Issue（审计轮次）
-2. 对每条发现，运行：
-   git blame <file> -L <line_start>,<line_end>
-   定位代码作者
-3. 在 GravityAIAudit 创建 Sub-issue
-   - 打上 severity: xxx / repo: xxx / source: xxx / owner: @xxx 标签
-   - 在 Parent Issue body 中用 tasklist 列出所有 Sub-issue 编号
-4. 通知相关开发者
+1. Create a Parent Issue for the audit round
+2. For each finding, run:
+     git blame <file> -L <line_start>,<line_end>
+   to locate the code author
+3. Create a Sub-issue in GravityAIAudit
+   - Apply labels: severity: xxx / repo: xxx / source: xxx / owner: @xxx
+   - Add the Sub-issue number to the Parent Issue tasklist
+4. Notify relevant developers
 ```
 
-### 4.2 修复流程（开发者视角）
+### Fix Workflow (Developer View)
 
-1. 开发者筛选带有自己 `owner:` label 的 Issue
-2. 在对应代码仓库（gravity-reth / gravity-sdk）创建修复分支
-3. 提交 PR 时，在 PR description 中写：
+1. Filter Issues by your `owner:` label
+2. Create a fix branch in `gravity-reth` or `gravity-sdk`
+3. In the PR description, reference the Issue:
    ```
    Fixes Galxe/GravityAIAudit#<issue_number>
    ```
-4. PR 合并后，在 Issue 中 comment 修复说明并关闭
+4. After the PR is merged, add a comment to the Issue and close it
 
-### 4.3 拒绝/无效流程
+### Reject / Invalid Workflow
 
-如果经讨论认为某条发现是误报或决定不修复：
+If a finding is a false positive or will not be fixed:
 
-1. 在 Issue 中添加 comment，说明理由
-2. 将 label 改为 `status: invalid` 或 `status: wont-fix`
-3. 由开发者本人或 Tech Lead 关闭 Issue
+1. Add a comment explaining the rationale
+2. Change the label to `status: invalid` or `status: wont-fix`
+3. Close the Issue (developer or Tech Lead)
 
-### 4.4 进度追踪
+### Progress Tracking
 
-Parent Issue body 使用 GitHub Tasklist 格式：
+Use GitHub Tasklist syntax in the Parent Issue body:
 
 ```markdown
 ## Findings
@@ -176,68 +176,66 @@ Parent Issue body 使用 GitHub Tasklist 格式：
 ### HIGH
 - [x] #14 [GRETH-022] BLOCKHASH opcode unimplemented ✅ fixed in gravity-reth#276
 - [ ] #15 [GRETH-023] Token loss during epoch transitions
-
-...
 ```
 
-GitHub 会自动在 Parent Issue 上渲染进度条（已关闭 / 总数）。
+GitHub renders this as a progress bar on the Parent Issue automatically.
 
 ---
 
-## 五、AI 自动化辅助
+## AI Automation
 
-### 5.1 当前可用（Claude Code）
+### Available Now (Claude Code)
 
 ```bash
-# 在 GravityAIAudit 目录下，让 Claude Code 执行：
+# From within the GravityAIAudit directory, ask Claude Code to:
 
-# 批量从审计报告创建 Issues
-"读取 audits/2026-03-05-phase2/ 下的报告，
- 为每条 HIGH+ 发现创建 Sub-issue，
- 并用 git blame 定位代码作者打上 owner label"
+# Bulk-create Issues from an audit report
+"Read audits/2026-03-05-phase2/ and create a Sub-issue for each HIGH+
+ finding, running git blame to identify the code author and apply the
+ correct owner label."
 
-# 每日进度汇总
-"扫描所有 open issues，按严重等级和开发者归属统计进度，输出 markdown 表格"
+# Daily progress summary
+"Scan all open issues, group by severity and owner, output a markdown table."
 ```
 
-### 5.2 进阶：GitHub Actions 自动化
+### Advanced: GitHub Actions
 
-`.github/workflows/auto-triage.yml` 中可配置：
+`.github/workflows/auto-triage.yml` handles:
 
-- **新 Issue 自动分类**：读取 Issue title 解析 severity/repo，自动打 label
-- **语义判定关闭**：Agent 读取 comment 语义（例如"confirmed false positive"），自动打 `status: invalid` 并关闭
-- **智能 blame 分发**：Agent 解析 Issue body 中的文件路径和行号，自动运行 `git blame`（对 submodule 代码），打上对应开发者的 `owner:` label
+- **Auto-label on open**: Parses `[SEVERITY]` and `[GRETH-` / `[GSDK-` from the Issue title, applies `severity:` and `repo:` labels automatically
+- **Semantic close** *(planned)*: Agent reads comment semantics (e.g. "confirmed false positive"), applies `status: invalid` and closes
+- **Auto blame & assign** *(planned)*: Agent parses file paths and line numbers from the Issue body, runs `git blame` against the submodule, applies `owner:` label
 
 ---
 
-## 六、代码子模块
+## Code Submodules
 
-被审计代码通过 submodule 引入，便于在 Issue 中直接对照：
+Audited codebases are included as submodules for direct cross-reference when reviewing Issues.
 
 ```bash
-# 初始化后执行（仓库已配置）
+# After cloning this repo
 git submodule update --init --recursive
 
-# 更新到最新
+# Update to latest
 git submodule update --remote gravity-reth
 git submodule update --remote gravity-sdk
 ```
 
-| 子模块 | 仓库 | 说明 |
-|--------|------|------|
-| `gravity-reth/` | https://github.com/Galxe/gravity-reth | EVM 执行层 |
-| `gravity-sdk/` | https://github.com/Galxe/gravity-sdk | AptosBFT 共识层 |
+| Submodule | Repository | Description |
+|-----------|-----------|-------------|
+| `gravity-reth/` | https://github.com/Galxe/gravity-reth | EVM execution layer |
+| `gravity-sdk/` | https://github.com/Galxe/gravity-sdk | AptosBFT consensus layer |
 
 ---
 
-## 已完成审计轮次
+## Completed Audit Rounds
 
-| 日期 | 来源 | 范围 | Findings | Issue |
-|------|------|------|----------|-------|
+| Date | Source | Scope | Findings | Parent Issue |
+|------|--------|-------|----------|--------------|
 | 2026-02-23 | AI (Claude Opus 4.6) | gravity-reth | CRITICAL:0 HIGH:3 MED:8 LOW:8 | [#1](#) |
 | 2026-02-28 | AI (Claude Opus 4.6) | gravity-sdk | CRITICAL:0 HIGH:2 MED:5 LOW:4 | [#2](#) |
 | 2026-03-05 | AI Phase 2 (Multi-agent) | gravity-reth + gravity-sdk | CRITICAL:2 HIGH:16 MED:25 LOW:16 | [#3](#) |
 
 ---
 
-*维护者：Galxe Engineering Team*
+*Maintained by the Galxe Engineering Team*

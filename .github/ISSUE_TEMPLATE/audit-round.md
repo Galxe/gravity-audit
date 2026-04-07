@@ -1,22 +1,22 @@
 ---
-name: "📋 审计轮次 (Parent Issue)"
-about: 记录一整轮审计的宏观信息和所有发现的汇总
-title: "[AUDIT] <来源> <轮次> — <目标仓库> <版本/日期>"
+name: "📋 Audit Round (Parent Issue)"
+about: Record the high-level information and findings summary for an entire audit round
+title: "[AUDIT] <Source> <Round> — <Target Repo> <Version/Date>"
 labels: "type: audit-round"
 ---
 
-## 审计信息
+## Audit Info
 
-- **审计来源**: <!-- AI (Claude Opus 4.6) / Trail of Bits / OtterSec / ... -->
-- **审计范围**: <!-- gravity-reth crates/..., gravity-sdk crates/... -->
-- **代码版本**: <!-- commit hash 或 tag -->
-- **报告链接**: <!-- 指向 audits/ 目录下的原始报告 -->
-- **审计方法**: <!-- Multi-agent parallel audit / Manual audit / ... -->
+- **Source**: <!-- AI (Claude Opus 4.6) / Trail of Bits / OtterSec / ... -->
+- **Scope**: <!-- gravity-reth crates/..., gravity-sdk crates/... -->
+- **Code Version**: <!-- commit hash or tag -->
+- **Report**: <!-- link to audits/ directory -->
+- **Methodology**: <!-- Multi-agent parallel audit / Manual audit / ... -->
 
-## 统计
+## Statistics
 
-| 严重等级 | 数量 |
-|---------|------|
+| Severity | Count |
+|----------|-------|
 | CRITICAL | <!-- x --> |
 | HIGH | <!-- x --> |
 | MEDIUM | <!-- x --> |
